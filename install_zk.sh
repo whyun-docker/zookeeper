@@ -5,12 +5,12 @@
 #date           :05-Feb-2015
 #usage          :/bin/bash install-zookeeper.sh
 
-#https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz
-ZOOKEEPER_VERSION=3.6.2
+#https://mirrors.tuna.tsinghua.edu.cn/apache/zookeeper/zookeeper-3.7.1/apache-zookeeper-3.7.1-bin.tar.gz
+
 ZOOKEEPER_FILENAME=apache-zookeeper-$ZOOKEEPER_VERSION-bin
 ZOOKEEPER_ARCHIVE_NAME=$ZOOKEEPER_FILENAME.tar.gz
 
-ZOOKEEPER_DOWNLOAD_ADDRESS=https://mirrors.bfsu.edu.cn/apache/zookeeper/zookeeper-$ZOOKEEPER_VERSION/$ZOOKEEPER_ARCHIVE_NAME
+ZOOKEEPER_DOWNLOAD_ADDRESS=https://mirrors.tuna.tsinghua.edu.cn/apache/zookeeper/zookeeper-$ZOOKEEPER_VERSION/$ZOOKEEPER_ARCHIVE_NAME
 
 INSTALL_DIR=/opt
 ZOOKEEPER_FULL_DIR=$INSTALL_DIR/$ZOOKEEPER_FILENAME
@@ -47,6 +47,6 @@ tar -xzvf $ZOOKEEPER_ARCHIVE_NAME -C $INSTALL_DIR
 echo "Creating symbolic link: to $ZOOKEEPER_DIR ..."
 ln -s $ZOOKEEPER_FULL_DIR/ $ZOOKEEPER_DIR
 cp $ZOOKEEPER_DIR/conf/zoo_sample.cfg $ZOOKEEPER_DIR/conf/zoo.cfg
-
+echo "JAVA_HOME=$JAVA_HOME" >> $ZOOKEEPER_DIR/conf/java.env
 echo "Cleaning archive..."
 rm -f "$ZOOKEEPER_ARCHIVE_NAME"

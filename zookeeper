@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # /etc/init.d/zookeeper: start the zookeeper daemon.
 
 # chkconfig: - 80 20
@@ -20,15 +20,14 @@ SHUTDOWN_WAIT=30
 
 
 # Source function library.
-. /etc/init.d/functions
+. /lib/lsb/init-functions
 
 start() {
     echo -n $"Starting $prog: "
 
     # Run daemon
     cd $ZK_HOME
-    nohup sh $ZK_SCRIPT start 2>&1 >> $ZK_CONSOLE_LOG 2>&1 &
-
+    nohup $ZK_SCRIPT start >&1 >> $ZK_CONSOLE_LOG 2>&1 &
 
     count=0
     launched=false
@@ -37,14 +36,19 @@ start() {
     do
         grep 'Starting zookeeper ... STARTED' $ZK_CONSOLE_LOG > /dev/null
         if [ $? -eq 0 ] ; then
-                    launched=true
-                    break
+            launched=true
+            break
         fi
         sleep 1
-        let count=$count+1;
+        count=$((count+1))
     done
-
-    success
+    if [ $launched = "true" ] ;
+    then
+        log_success_msg "zookeeper start succcess"
+    else
+        log_failure_msg "zookeeper start fail"
+        tail -1000 $ZK_CONSOLE_LOG
+    fi
     echo
     return 0
 }
@@ -52,7 +56,7 @@ start() {
 stop() {
     echo -n $"Stopping $prog: "
     $ZK_SCRIPT  stop
-    success
+    log_success_msg
     echo
 }
 
