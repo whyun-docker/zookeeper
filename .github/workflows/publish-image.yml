@@ -1,0 +1,58 @@
+name: Build and Publish Image
+
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the master branch
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**.html'
+
+env:
+  ZOOKEEPER_VERSION: 3.7.1
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry dockerhub
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build and push 
+        uses: docker/build-push-action@v3
+        with:
+          context: ./
+          build-args: |
+            ZOOKEEPER_VERSION=${{ env.ZOOKEEPER_VERSION }}
+          push: true
+          tags: |
+            yunnysunny/zookeeper:latest
+            yunnysunny/zookeeper:${{ env.ZOOKEEPER_VERSION }}
+          cache-from: type=registry,ref=yunnysunny/zookeeper:buildcache
+          cache-to: type=registry,ref=yunnysunny/zookeeper:buildcache,mode=max
+      - name: Update zookeeper description
+        uses: peter-evans/dockerhub-description@v2
+        if: ${{ github.event_name != 'pull_request' }}
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+          repository: yunnysunny/zookeeper
+      

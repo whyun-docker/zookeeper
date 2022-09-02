@@ -1,0 +1,101 @@
+#! /bin/sh
+# /etc/init.d/zookeeper: start the zookeeper daemon.
+
+# chkconfig: - 80 20
+# description: zookeeper
+
+ZK_HOME=/opt/zookeeper
+ZK_USER=root
+ZK_SCRIPT=$ZK_HOME/bin/zkServer.sh
+ZK_CONSOLE_LOG=/data/app/log/zookeeper.log
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin
+
+prog=zookeeper
+DESC="zookeeper daemon"
+
+RETVAL=0
+STARTUP_WAIT=30
+SHUTDOWN_WAIT=30
+
+
+# Source function library.
+. /etc/init.d/functions
+
+start() {
+    echo -n $"Starting $prog: "
+
+    # Run daemon
+    cd $ZK_HOME
+    nohup sh $ZK_SCRIPT start 2>&1 >> $ZK_CONSOLE_LOG 2>&1 &
+
+
+    count=0
+    launched=false
+  
+    until [ $count -gt $STARTUP_WAIT ]
+    do
+        grep 'Starting zookeeper ... STARTED' $ZK_CONSOLE_LOG > /dev/null
+        if [ $? -eq 0 ] ; then
+                    launched=true
+                    break
+        fi
+        sleep 1
+        let count=$count+1;
+    done
+
+    success
+    echo
+    return 0
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    $ZK_SCRIPT  stop
+    success
+    echo
+}
+
+reload() {
+    stop
+    start
+}
+
+restart() {
+    $ZK_SCRIPT   restart
+}
+
+status() {
+    $ZK_SCRIPT  status
+    return $?
+}
+
+case "$1" in
+start)
+    start
+    ;;
+
+stop)
+    stop
+    ;;
+
+reload)
+    reload
+    ;;
+
+restart)
+    restart
+    ;;
+
+status)
+    status
+    ;;
+*)
+
+echo $"Usage: $0 {start|stop|reload|restart|status}"
+exit 1
+esac
+
+exit $?
+
+
