@@ -6,4 +6,6 @@
 
 yunnysunny/zookeeper:${ZOOKEEPER_VERSION}
 
-当前支持的版本 3.7.1
+当前支持的版本有
+
+- 3.7.1
